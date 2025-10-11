@@ -110,11 +110,13 @@ def get_dataset(args, config):
             download=True,
         )
     elif config.data.dataset == "lsun_bedroom" or config.data.dataset == "lsun_cat":
+        # Ensure images are resized to square (H=W=image_size) to match downstream
+        # assumptions and avoid reshape errors.
         dataset = torchvision.datasets.ImageFolder(
             os.path.join(args.exp, 'datasets', config.data.dataset),
             transform=transforms.Compose(
                 [
-                    transforms.Resize(config.data.image_size),
+                    transforms.Resize([config.data.image_size, config.data.image_size]),
                     transforms.ToTensor(),
                 ])
         )

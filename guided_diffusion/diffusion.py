@@ -106,6 +106,13 @@ class Diffusion(object):
             args.subset_end = len(test_dataset)
 
         print(f'Dataset has size {len(test_dataset)}')
+        try:
+            print(f"Configured batch size: {config.sampling.batch_size}")
+            num_batches = len(test_dataset) // config.sampling.batch_size
+            if len(test_dataset) % config.sampling.batch_size != 0:
+                print(f"Note: dataset size not divisible by batch size; dropping last batch")
+        except Exception:
+            pass
 
         def seed_worker(worker_id):
             worker_seed = args.seed % 2 ** 32
@@ -114,12 +121,15 @@ class Diffusion(object):
 
         g = torch.Generator()
         g.manual_seed(args.seed)
+        # Use safe defaults for parallelism and drop incomplete final batch
+        safe_num_workers = min(getattr(config.data, 'num_workers', 4) or 4, 4)
         val_loader = data.DataLoader(
             test_dataset,
             batch_size=config.sampling.batch_size,
-            num_workers=config.data.num_workers,
+            num_workers=safe_num_workers,
             worker_init_fn=seed_worker,
             generator=g,
+            drop_last=True,
         )
 
         # Set deltas
@@ -257,6 +267,12 @@ class Diffusion(object):
         sigma_y = args.sigma_y
 
         print(f'Start from {args.subset_start}')
+        # Report effective number of batches after drop_last to avoid confusion
+        try:
+            eff_batches = len(val_loader)
+            print(f"Effective number of batches (drop_last=True): {eff_batches}")
+        except Exception:
+            pass
         idx_init = args.subset_start
         idx_so_far = args.subset_start
         avg_psnr = 0.0
@@ -271,6 +287,13 @@ class Diffusion(object):
 
             x_orig = x_orig.to(self.device)
             x_orig = data_transform(self.config, x_orig)
+            # Debug shapes to catch mismatches early
+            try:
+                print(f"x_orig shape: {tuple(x_orig.shape)}, elements: {x_orig.numel()}")
+                expected_elems = x_orig.shape[0] * self.config.data.channels * self.config.data.image_size * self.config.data.image_size
+                print(f"Expected per-batch elements: {expected_elems}")
+            except Exception:
+                pass
 
             y = A_funcs.A(x_orig)
 
