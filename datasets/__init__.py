@@ -114,7 +114,7 @@ def get_dataset(args, config):
             os.path.join(args.exp, 'datasets', config.data.dataset),
             transform=transforms.Compose(
                 [
-                    transforms.Resize(config.data.image_size),
+                    transforms.Resize([config.data.image_size, config.data.image_size]),
                     transforms.ToTensor(),
                 ])
         )

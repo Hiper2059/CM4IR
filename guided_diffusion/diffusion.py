@@ -106,6 +106,7 @@ class Diffusion(object):
             args.subset_end = len(test_dataset)
 
         print(f'Dataset has size {len(test_dataset)}')
+        print(f'Configured batch_size={config.sampling.batch_size}, num_workers={config.data.num_workers}')
 
         def seed_worker(worker_id):
             worker_seed = args.seed % 2 ** 32
@@ -120,6 +121,7 @@ class Diffusion(object):
             num_workers=config.data.num_workers,
             worker_init_fn=seed_worker,
             generator=g,
+            drop_last=True,
         )
 
         # Set deltas
@@ -271,6 +273,11 @@ class Diffusion(object):
 
             x_orig = x_orig.to(self.device)
             x_orig = data_transform(self.config, x_orig)
+            # Debug shapes to catch mismatch early
+            try:
+                print(f"x_orig shape: {tuple(x_orig.shape)}, elements: {x_orig.numel()}")
+            except Exception:
+                pass
 
             y = A_funcs.A(x_orig)
 

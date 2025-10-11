@@ -99,6 +99,10 @@ def parse_args_and_config():
 
     args = parser.parse_args()
 
+    # Limit thread usage for Kaggle/CPU stability
+    os.environ.setdefault('OMP_NUM_THREADS', '4')
+    os.environ.setdefault('MKL_NUM_THREADS', '4')
+
     # parse config file
     with open(os.path.join("configs", args.config), "r") as f:
         config = yaml.safe_load(f)
