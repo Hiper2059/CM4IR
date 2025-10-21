@@ -290,7 +290,13 @@ class AttentionBlock(nn.Module):
         self.qkv = conv_nd(dims, channels, channels * 3, 1)
         self.attention_type = attention_type
         if attention_type == "flash":
-            self.attention = QKVFlashAttention(channels, self.num_heads)
+            # Try to use FlashAttention when available; gracefully fall back otherwise
+            try:
+                self.attention = QKVFlashAttention(channels, self.num_heads)
+            except Exception:
+                # Kaggle often lacks a matching prebuilt flash-attn wheel; use a safe fallback
+                self.attention_type = "legacy"
+                self.attention = QKVAttentionLegacy(self.num_heads)
         else:
             # split heads before split qkv
             self.attention = QKVAttentionLegacy(self.num_heads)

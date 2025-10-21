@@ -1,5 +1,7 @@
 einops==0.8.0
-flash-attn==0.2.8
+# flash-attn may be unavailable in Kaggle; make it optional by pinning via extras
+# If available, Kaggle can install it; otherwise code falls back to legacy attention
+# flash-attn==0.2.8
 numpy==1.24.4
 torch
 torchvision
