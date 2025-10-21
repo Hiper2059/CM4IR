@@ -317,7 +317,8 @@ class Diffusion(object):
                                                                            config.data.channels,
                                                                            self.config.data.image_size,
                                                                            self.config.data.image_size)
-            if args.save_observed_img:
+            # Optionally save observed/initial images; overridden by no_save_preds
+            if args.save_observed_img and not self.args.no_save_preds:
                 os.makedirs(os.path.join(self.args.image_folder, "Apy"), exist_ok=True)
                 for i in range(len(Apy)):
                     tvu.save_image(
@@ -380,9 +381,11 @@ class Diffusion(object):
             x = [inverse_data_transform(config, xi) for xi in x]
 
             for j in range(x[0].size(0)):
-                tvu.save_image(
-                    x[0][j], os.path.join(self.args.image_folder, f"{idx_so_far + j}_{0}.png")
-                )
+                # Skip saving predicted images when no_save_preds is set
+                if not self.args.no_save_preds:
+                    tvu.save_image(
+                        x[0][j], os.path.join(self.args.image_folder, f"{idx_so_far + j}_{0}.png")
+                    )
                 orig = inverse_data_transform(config, x_orig[j])
                 mse = torch.mean((x[0][j].to(self.device) - orig) ** 2)
                 psnr = 10 * torch.log10(1 / mse)
