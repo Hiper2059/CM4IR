@@ -97,6 +97,26 @@ def parse_args_and_config():
         help="Whether to inject deltas in the scaling calculation (1) or not (0)."
     )
 
+    # Optional controls and compatibility flags
+    parser.add_argument(
+        "--no_save_preds",
+        action="store_true",
+        help="Do not save predicted/restored images to disk.",
+    )
+    # Accept common but unused flags to avoid CLI errors on external runners (e.g., Kaggle)
+    parser.add_argument(
+        "--gt_dir",
+        type=str,
+        default=None,
+        help="(Ignored) Ground-truth directory for external evaluators.",
+    )
+    parser.add_argument(
+        "--metrics",
+        type=str,
+        default=None,
+        help="(Ignored) Comma-separated metrics list. PSNR/LPIPS are logged by default.",
+    )
+
     args = parser.parse_args()
 
     # Limit BLAS thread usage for stability on constrained environments
