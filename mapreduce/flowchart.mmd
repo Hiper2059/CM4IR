@@ -1,0 +1,12 @@
+%% CM4IR on Kaggle - Mapper/Reducer Flow
+flowchart TD
+  A[Client: Kaggle Notebook / Script\nProvide INPUT_LIST or SOURCE_DIR] --> B[Set ENV vars\nCM4IR_CONFIG, PATH_Y, MODEL_CKPT, ...]
+  B --> M[kaggle/mapper.sh]
+  subgraph Mapper
+    M --> G[Select GPU by TASK_ID -> CUDA_VISIBLE_DEVICES]
+    G --> S[Stage shard to exp/datasets/<PATH_Y>/<class_subdir>]
+    S --> P[Run: python main.py --config ... --model_ckpt ...]
+    P --> O[Write PNGs + 0_logs.log\nexp/image_samples/<TASK_ID>]
+  end
+  O --> R[kaggle/reducer.sh]
+  R --> Z[Summary to stderr\nZIP optional to /kaggle/working]
