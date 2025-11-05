@@ -156,12 +156,21 @@ def get_dataset(args, config):
 
         if config.data.subset_1k:
             from datasets.imagenet_subset import ImageDataset
-            # Check if meta_file exists, if not, auto-scan directory
+            # Check if we should auto-scan or use meta file
+            auto_scan = getattr(config.data, 'auto_scan', False)
             meta_file_path = os.path.join(args.exp, 'imagenet_val.txt')
             max_images = getattr(config.data, 'max_images', None)
             
-            if os.path.exists(meta_file_path):
-                # Use meta file if it exists
+            if auto_scan:
+                # Force auto-scan directory, ignore meta file
+                print(f"Auto-scan mode enabled, scanning directory for images...")
+                dataset = ImageDataset(os.path.join(args.exp, 'datasets', 'imagenet', 'imagenet'),
+                                       meta_file=None,
+                                       image_size=config.data.image_size,
+                                       normalize=False,
+                                       max_images=max_images)
+            elif os.path.exists(meta_file_path):
+                # Use meta file if it exists and auto_scan is False
                 dataset = ImageDataset(os.path.join(args.exp, 'datasets', 'imagenet', 'imagenet'),
                                        meta_file_path,
                                        image_size=config.data.image_size,

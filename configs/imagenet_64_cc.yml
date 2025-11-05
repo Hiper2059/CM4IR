@@ -10,6 +10,7 @@ data:
     num_workers: 4
     subset_1k: True            # Set to True to use ImageDataset (auto-scan or meta file)
     out_of_dist: False
+    auto_scan: True            # If True, auto-scan directory and ignore imagenet_val.txt file
     max_images: null           # Maximum number of images to load (null = all, only used when auto-scanning)
 
 model:
