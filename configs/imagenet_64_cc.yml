@@ -1,5 +1,5 @@
 data:
-    dataset: "Custom"       # ⚠️ Đổi từ ImageNet -> Custom
+    dataset: "imagenet"       # ⚠️ Đổi từ ImageNet -> Custom
     image_size: 64
     channels: 3
     logit_transform: false
@@ -39,8 +39,4 @@ sampling:
     batch_size: 1
     T_sampling: 4
 
-datasets:
-    path_y: exp/datasets/imagenet/imagenet
-    name: imagenet
-    batch_size: 1
-    n_samples: -1
+
