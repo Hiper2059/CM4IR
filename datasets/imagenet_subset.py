@@ -131,11 +131,17 @@ class ImageDataset(data.Dataset):
             print("found %d images" % self.num)
             
             # Store relative paths from root_dir
+            # Generate random class labels if not available (for class-conditional models)
+            import random
+            random.seed(42)  # For reproducibility
             for img_path in image_files:
                 rel_path = os.path.relpath(img_path, root_dir)
                 # Normalize path separators
                 rel_path = rel_path.replace('\\', '/')
-                self.metas.append((rel_path, -1))  # No class label available
+                # Generate random class label in range [0, 999] for ImageNet (1000 classes)
+                # This will be replaced if model doesn't need class conditioning
+                random_class = random.randint(0, 999)
+                self.metas.append((rel_path, random_class))
             
             print("scanning done")
 
