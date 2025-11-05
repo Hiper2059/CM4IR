@@ -151,15 +151,29 @@ def get_dataset(args, config):
             )
             test_dataset = Subset(dataset, test_indices)
 
-    elif config.data.dataset == 'ImageNet':
+    elif config.data.dataset == 'ImageNet' or config.data.dataset.lower() == 'imagenet':
         # only use validation dataset here
 
         if config.data.subset_1k:
             from datasets.imagenet_subset import ImageDataset
-            dataset = ImageDataset(os.path.join(args.exp, 'datasets', 'imagenet', 'imagenet'),
-                                   os.path.join(args.exp, 'imagenet_val.txt'),
-                                   image_size=config.data.image_size,
-                                   normalize=False)
+            # Check if meta_file exists, if not, auto-scan directory
+            meta_file_path = os.path.join(args.exp, 'imagenet_val.txt')
+            max_images = getattr(config.data, 'max_images', None)
+            
+            if os.path.exists(meta_file_path):
+                # Use meta file if it exists
+                dataset = ImageDataset(os.path.join(args.exp, 'datasets', 'imagenet', 'imagenet'),
+                                       meta_file_path,
+                                       image_size=config.data.image_size,
+                                       normalize=False)
+            else:
+                # Auto-scan directory if meta file doesn't exist
+                print(f"Meta file not found at {meta_file_path}, auto-scanning directory...")
+                dataset = ImageDataset(os.path.join(args.exp, 'datasets', 'imagenet', 'imagenet'),
+                                       meta_file=None,
+                                       image_size=config.data.image_size,
+                                       normalize=False,
+                                       max_images=max_images)
             test_dataset = dataset
         elif config.data.out_of_dist:
             dataset = torchvision.datasets.ImageFolder(
