@@ -1,5 +1,5 @@
 data:
-    dataset: "ImageNet"
+    dataset: "Custom"       # ⚠️ Đổi từ ImageNet -> Custom
     image_size: 64
     channels: 3
     logit_transform: false
@@ -8,7 +8,7 @@ data:
     random_flip: true
     rescaled: true
     num_workers: 4
-    subset_1k: False     # ⚠️ Bỏ giới hạn 1k ảnh
+    subset_1k: False
     out_of_dist: False
 
 model:
@@ -40,8 +40,7 @@ sampling:
     T_sampling: 4
 
 datasets:
-    # ⚙️ Đọc trực tiếp thư mục ảnh của bạn (5000 ảnh)
     path_y: exp/datasets/imagenet/imagenet
     name: imagenet
     batch_size: 1
-    n_samples: -1       # Không giới hạn số lượng ảnh
+    n_samples: -1
