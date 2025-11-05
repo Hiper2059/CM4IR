@@ -8,7 +8,7 @@ data:
     random_flip: true
     rescaled: true
     num_workers: 4
-    subset_1k: True
+    subset_1k: False     # ⚠️ Bỏ giới hạn 1k ảnh
     out_of_dist: False
 
 model:
@@ -29,7 +29,6 @@ model:
     class_cond: true
     num_classes: 1000
 
-
 diffusion:
     beta_schedule: linear
     beta_start: 0.0001
@@ -39,3 +38,10 @@ diffusion:
 sampling:
     batch_size: 1
     T_sampling: 4
+
+datasets:
+    # ⚙️ Đọc trực tiếp thư mục ảnh của bạn (5000 ảnh)
+    path_y: exp/datasets/imagenet/imagenet
+    name: imagenet
+    batch_size: 1
+    n_samples: -1       # Không giới hạn số lượng ảnh
