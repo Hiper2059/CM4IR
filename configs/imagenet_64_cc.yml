@@ -8,8 +8,9 @@ data:
     random_flip: true
     rescaled: true
     num_workers: 4
-    subset_1k: False
+    subset_1k: True            # Set to True to use ImageDataset (auto-scan or meta file)
     out_of_dist: False
+    max_images: null           # Maximum number of images to load (null = all, only used when auto-scanning)
 
 model:
     in_channels: 3
