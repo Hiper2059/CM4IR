@@ -110,13 +110,11 @@ def get_dataset(args, config):
             download=True,
         )
     elif config.data.dataset == "lsun_bedroom" or config.data.dataset == "lsun_cat":
-        # Ensure images are resized to square (H=W=image_size) to match downstream
-        # assumptions and avoid reshape errors.
         dataset = torchvision.datasets.ImageFolder(
             os.path.join(args.exp, 'datasets', config.data.dataset),
             transform=transforms.Compose(
                 [
-                    transforms.Resize([config.data.image_size, config.data.image_size]),
+                    transforms.Resize(config.data.image_size),
                     transforms.ToTensor(),
                 ])
         )
@@ -151,38 +149,15 @@ def get_dataset(args, config):
             )
             test_dataset = Subset(dataset, test_indices)
 
-    elif config.data.dataset == 'ImageNet' or config.data.dataset.lower() == 'imagenet':
+    elif config.data.dataset == 'ImageNet':
         # only use validation dataset here
 
         if config.data.subset_1k:
             from datasets.imagenet_subset import ImageDataset
-            # Check if we should auto-scan or use meta file
-            auto_scan = getattr(config.data, 'auto_scan', False)
-            meta_file_path = os.path.join(args.exp, 'imagenet_val.txt')
-            max_images = getattr(config.data, 'max_images', None)
-            
-            if auto_scan:
-                # Force auto-scan directory, ignore meta file
-                print(f"Auto-scan mode enabled, scanning directory for images...")
-                dataset = ImageDataset(os.path.join(args.exp, 'datasets', 'imagenet', 'imagenet'),
-                                       meta_file=None,
-                                       image_size=config.data.image_size,
-                                       normalize=False,
-                                       max_images=max_images)
-            elif os.path.exists(meta_file_path):
-                # Use meta file if it exists and auto_scan is False
-                dataset = ImageDataset(os.path.join(args.exp, 'datasets', 'imagenet', 'imagenet'),
-                                       meta_file_path,
-                                       image_size=config.data.image_size,
-                                       normalize=False)
-            else:
-                # Auto-scan directory if meta file doesn't exist
-                print(f"Meta file not found at {meta_file_path}, auto-scanning directory...")
-                dataset = ImageDataset(os.path.join(args.exp, 'datasets', 'imagenet', 'imagenet'),
-                                       meta_file=None,
-                                       image_size=config.data.image_size,
-                                       normalize=False,
-                                       max_images=max_images)
+            dataset = ImageDataset(os.path.join(args.exp, 'datasets', 'imagenet', 'imagenet'),
+                                   os.path.join(args.exp, 'imagenet_val.txt'),
+                                   image_size=config.data.image_size,
+                                   normalize=False)
             test_dataset = dataset
         elif config.data.out_of_dist:
             dataset = torchvision.datasets.ImageFolder(
