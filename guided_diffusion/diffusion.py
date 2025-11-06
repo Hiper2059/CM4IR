@@ -4,6 +4,7 @@ import random
 import lpips
 import numpy as np
 import torch
+import torch.nn.functional as F
 import torch.utils.data as data
 import torchvision.utils as tvu
 import tqdm
@@ -287,6 +288,17 @@ class Diffusion(object):
 
             x_orig = x_orig.to(self.device)
             x_orig = data_transform(self.config, x_orig)
+            # Enforce square spatial size (H=W=image_size) to match operator assumptions
+            if (
+                x_orig.shape[-2] != self.config.data.image_size
+                or x_orig.shape[-1] != self.config.data.image_size
+            ):
+                x_orig = F.interpolate(
+                    x_orig,
+                    size=(self.config.data.image_size, self.config.data.image_size),
+                    mode="bilinear",
+                    align_corners=False,
+                )
             # Debug shapes to catch mismatches early
             try:
                 print(f"x_orig shape: {tuple(x_orig.shape)}, elements: {x_orig.numel()}")
